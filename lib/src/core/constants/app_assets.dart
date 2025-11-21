@@ -14,4 +14,5 @@ class AppAssets {
   static const String storyAladdin = 'assets/images/story_aladdin.png';
   static const String storyMaryam = 'assets/images/story_maryam.png';
   static const String searchPlaceholder = 'assets/images/search_placeholder.png';
+  static const String favoritesPlaceholder = 'assets/images/favorites_placeholder.png';
 }

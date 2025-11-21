@@ -4,6 +4,7 @@ import '../../core/constants/app_assets.dart';
 import '../../core/theme/app_theme.dart';
 import '../request_story/request_story_screen.dart';
 import '../search/search_screen.dart';
+import '../menu/menu_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,7 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _buildHomeContent(),
           const SearchScreen(),
           const RequestStoryScreen(),
-          const Center(child: Text('القائمة')), // Placeholder for Menu
+          const MenuScreen(),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
