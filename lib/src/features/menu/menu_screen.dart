@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/theme/app_theme.dart';
 
-import '../favorites/favorites_sheet.dart';
+
 
 class MenuScreen extends StatelessWidget {
   const MenuScreen({super.key});
@@ -31,7 +32,7 @@ class MenuScreen extends StatelessWidget {
               'المفضلة',
               Icons.favorite,
               Colors.red,
-              () => _showFavoritesSheet(context),
+              () => context.push('/favorites'),
             ),
             const SizedBox(height: 16),
             _buildMenuItem(
@@ -39,7 +40,7 @@ class MenuScreen extends StatelessWidget {
               'من نحن',
               Icons.info,
               Colors.red,
-              () {},
+              () => context.push('/who-we-are'),
             ),
             const SizedBox(height: 16),
             _buildMenuItem(
@@ -47,7 +48,7 @@ class MenuScreen extends StatelessWidget {
               'رؤيتنا',
               Icons.lightbulb,
               Colors.red,
-              () {},
+              () => context.push('/our-vision'),
             ),
             const SizedBox(height: 16),
             _buildMenuItem(
@@ -120,15 +121,7 @@ class MenuScreen extends StatelessWidget {
     );
   }
 
-  void _showFavoritesSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => const FavoritesSheet(),
-    );
-  }
+
 
   void _showContactUsSheet(BuildContext context) {
     showModalBottomSheet(
