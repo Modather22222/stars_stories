@@ -47,7 +47,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 controller: _controller,
                 onPageChanged: (index) {
                   setState(() {
-                    isLastPage = index == 1;
+                    isLastPage = index == 2;
                   });
                 },
                 children: const [
@@ -61,6 +61,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     title: 'عالم من الخيال والمغامرة',
                     description: 'قصص تأخذ طفلك في رحلات ممتعة وتنمي خياله وإبداعه مع شخصيات محبوبة.',
                   ),
+                  OnboardingPage(
+                    image: AppAssets.onboarding3,
+                    title: 'كل قصة نجمة تضيء خيال طفلك',
+                    description: 'مجموعة متنوعة من القصص التعليمية والترفيهية التي تناسب جميع الأعمار.',
+                  ),
                 ],
               ),
             ),
@@ -72,7 +77,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 children: [
                   SmoothPageIndicator(
                     controller: _controller,
-                    count: 2,
+                    count: 3,
                     effect: const ExpandingDotsEffect(
                       activeDotColor: AppTheme.primaryColor,
                       dotColor: Color(0xFFE0E0E0),
@@ -105,7 +110,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         elevation: 4,
                       ),
                       child: Text(
-                        isLastPage ? 'ابدأ الآن' : 'التالي',
+                        isLastPage ? 'هيا نبدأ' : 'التالي',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
