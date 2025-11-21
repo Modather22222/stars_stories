@@ -8,4 +8,9 @@ class AppAssets {
   static const String catIslamic = 'assets/images/cat_islamic.png';
   static const String storyThumb1 = 'assets/images/story_thumb_1.png';
   static const String storyThumb2 = 'assets/images/story_thumb_2.png';
+  static const String catFantasy = 'assets/images/cat_fantasy.png';
+  static const String catPurposeful = 'assets/images/cat_purposeful.png';
+  static const String catProphets = 'assets/images/cat_prophets.png';
+  static const String storyAladdin = 'assets/images/story_aladdin.png';
+  static const String storyMaryam = 'assets/images/story_maryam.png';
 }

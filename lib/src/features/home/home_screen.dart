@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/theme/app_theme.dart';
 
@@ -112,7 +113,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 24),
 
                 // Categories Header
-                _buildSectionHeader('الأقسام', 'عرض الكل'),
+                _buildSectionHeader(context, 'الأقسام', 'عرض الكل', () {
+                  context.push('/categories');
+                }),
                 const SizedBox(height: 16),
 
                 // Categories List
@@ -138,7 +141,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 24),
 
                 // Recently Added Header
-                _buildSectionHeader('مضافة حديثاً', 'عرض الكل'),
+                _buildSectionHeader(context, 'مضافة حديثاً', 'عرض الكل', () {
+                  context.push('/stories-list', extra: 'مضافة حديثاً');
+                }),
                 const SizedBox(height: 16),
 
                 // Recently Added List
@@ -199,7 +204,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildSectionHeader(String title, String action) {
+  Widget _buildSectionHeader(BuildContext context, String title, String action, VoidCallback onTap) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -212,7 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         TextButton(
-          onPressed: () {},
+          onPressed: onTap,
           child: Row(
             children: [
               Text(
