@@ -3,35 +3,50 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/theme/app_theme.dart';
 
-class StoriesListScreen extends StatelessWidget {
-  final String title;
+class SearchScreen extends StatefulWidget {
+  const SearchScreen({super.key});
 
-  const StoriesListScreen({super.key, required this.title});
+  @override
+  State<SearchScreen> createState() => _SearchScreenState();
+}
+
+class _SearchScreenState extends State<SearchScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          title,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        foregroundColor: AppTheme.darkText,
-      ),
-      body: Padding(
+    return SafeArea(
+      child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            // Header
+            const Text(
+              'البحث',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.darkText,
+              ),
+            ),
+            const SizedBox(height: 24),
+
             // Search Bar
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
+                border: Border.all(
+                  color: _searchQuery.isNotEmpty ? AppTheme.primaryColor : Colors.grey.withValues(alpha: 0.2),
+                ),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.grey.withValues(alpha: 0.05),
@@ -40,34 +55,93 @@ class StoriesListScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              child: const TextField(
+              child: TextField(
+                controller: _searchController,
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                  });
+                },
                 decoration: InputDecoration(
                   hintText: 'ابحث عن قصة',
                   border: InputBorder.none,
-                  icon: Icon(Icons.search, color: AppTheme.greyText),
+                  suffixIcon: Icon(
+                    Icons.search,
+                    color: _searchQuery.isNotEmpty ? AppTheme.primaryColor : AppTheme.greyText,
+                  ),
                 ),
               ),
             ),
             const SizedBox(height: 24),
 
-            // Grid
+            // Content
             Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                childAspectRatio: 0.75,
-                children: [
-                  _buildStoryCard(context, 'علاء الدين والمصباح السحري', AppAssets.storyAladdin, 4.8),
-                  _buildStoryCard(context, 'مريم ومساعدة الآخرين', AppAssets.storyMaryam, 4.8),
-                  _buildStoryCard(context, 'مريم ومساعدة الآخرين', AppAssets.storyMaryam, 4.9), // Duplicate for demo
-                  _buildStoryCard(context, 'علاء الدين والمصباح السحري', AppAssets.storyAladdin, 4.8), // Duplicate for demo
-                ],
-              ),
+              child: _searchQuery.isEmpty
+                  ? _buildEmptyState()
+                  : _buildSearchResults(),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            AppAssets.searchPlaceholder,
+            width: 200,
+            height: 200,
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'ابحث عن قصتك المفضلة',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.darkText,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'اكتب اسم القصة أو الشخصية للبحث عنها',
+            style: TextStyle(
+              color: AppTheme.greyText,
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchResults() {
+    // Mock results for demonstration
+    final results = [
+      {'title': 'علاء الدين والمصباح السحري', 'image': AppAssets.storyAladdin, 'rating': 4.8},
+      {'title': 'علاء الدين والمصباح السحري', 'image': AppAssets.storyAladdin, 'rating': 4.8},
+    ];
+
+    return GridView.builder(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: 16,
+        crossAxisSpacing: 16,
+        childAspectRatio: 0.75,
+      ),
+      itemCount: results.length,
+      itemBuilder: (context, index) {
+        final story = results[index];
+        return _buildStoryCard(
+          context,
+          story['title'] as String,
+          story['image'] as String,
+          story['rating'] as double,
+        );
+      },
     );
   }
 

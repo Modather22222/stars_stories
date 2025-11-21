@@ -4,6 +4,8 @@ import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/home/categories_screen.dart';
 import '../../features/home/stories_list_screen.dart';
+import '../../features/story/story_details_screen.dart';
+import '../../features/request_story/request_story_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/',
@@ -30,6 +32,20 @@ final appRouter = GoRouter(
         final title = state.extra as String? ?? 'قائمة القصص';
         return StoriesListScreen(title: title);
       },
+    ),
+    GoRoute(
+      path: '/story-details',
+      builder: (context, state) {
+        final args = state.extra as Map<String, String>;
+        return StoryDetailsScreen(
+          title: args['title']!,
+          imagePath: args['imagePath']!,
+        );
+      },
+    ),
+    GoRoute(
+      path: '/request-story',
+      builder: (context, state) => const RequestStoryScreen(),
     ),
   ],
 );
