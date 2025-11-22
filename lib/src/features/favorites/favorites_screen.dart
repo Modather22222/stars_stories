@@ -68,20 +68,26 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     _loadFavorites();
     
     if (mounted) {
-      _showCustomNotification(
+      _showCustomNotificationWithUndo(
         context,
         'تم الإزالة من المفضلة',
         Icons.favorite_border,
         Colors.grey,
+        () async {
+          // Undo: Re-add to favorites
+          await FavoritesService.addFavorite(storyId);
+          _loadFavorites();
+        },
       );
     }
   }
 
-  void _showCustomNotification(
+  void _showCustomNotificationWithUndo(
     BuildContext context,
     String message,
     IconData icon,
     Color color,
+    VoidCallback onUndo,
   ) {
     final overlay = Overlay.of(context);
     late OverlayEntry overlayEntry;
@@ -103,8 +109,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               );
             },
             child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 40),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              margin: const EdgeInsets.symmetric(horizontal: 32),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
@@ -140,7 +146,34 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                         fontWeight: FontWeight.w600,
                         color: AppTheme.darkText,
                       ),
-                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  // Undo Button
+                  InkWell(
+                    onTap: () {
+                      overlayEntry.remove();
+                      onUndo();
+                    },
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: AppTheme.primaryColor.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: const Text(
+                        'تراجع',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primaryColor,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -153,8 +186,10 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
     overlay.insert(overlayEntry);
 
-    Future.delayed(const Duration(seconds: 2), () {
-      overlayEntry.remove();
+    Future.delayed(const Duration(seconds: 4), () {
+      if (overlayEntry.mounted) {
+        overlayEntry.remove();
+      }
     });
   }
 
