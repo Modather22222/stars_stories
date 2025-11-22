@@ -200,18 +200,19 @@ class MenuScreen extends StatelessWidget {
         border: Border.all(color: borderColor),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Icon(icon, color: textColor),
-          const SizedBox(width: 8),
+          const SizedBox(width: 16), // Padding from right edge
           Text(
-            ' | $title',
+            title,
             style: TextStyle(
               color: textColor,
               fontWeight: FontWeight.bold,
               fontSize: 16,
             ),
           ),
+          const SizedBox(width: 8),
+          Icon(icon, color: textColor),
         ],
       ),
     );
