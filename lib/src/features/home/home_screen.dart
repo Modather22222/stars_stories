@@ -32,67 +32,81 @@ class _HomeScreenState extends State<HomeScreen> {
           const MenuScreen(),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: AppTheme.primaryColor,
-        unselectedItemColor: Colors.grey,
-        showUnselectedLabels: true,
-        items: [
-          BottomNavigationBarItem(
-            icon: SvgPicture.asset(
-              AppAssets.navHome,
-              colorFilter: ColorFilter.mode(
-                _selectedIndex == 0 ? AppTheme.primaryColor : Colors.grey,
-                BlendMode.srcIn,
-              ),
-              width: 24,
-              height: 24,
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
             ),
-            label: 'الرئيسية',
-          ),
-          BottomNavigationBarItem(
-            icon: SvgPicture.asset(
-              AppAssets.navSearch,
-              colorFilter: ColorFilter.mode(
-                _selectedIndex == 1 ? AppTheme.primaryColor : Colors.grey,
-                BlendMode.srcIn,
+          ],
+        ),
+        child: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          onTap: (index) {
+            setState(() {
+              _selectedIndex = index;
+            });
+          },
+          type: BottomNavigationBarType.fixed,
+          selectedItemColor: AppTheme.primaryColor,
+          unselectedItemColor: Colors.grey,
+          showUnselectedLabels: true,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          items: [
+            BottomNavigationBarItem(
+              icon: SvgPicture.asset(
+                AppAssets.navHome,
+                colorFilter: ColorFilter.mode(
+                  _selectedIndex == 0 ? AppTheme.primaryColor : Colors.grey,
+                  BlendMode.srcIn,
+                ),
+                width: 24,
+                height: 24,
               ),
-              width: 24,
-              height: 24,
+              label: 'الرئيسية',
             ),
-            label: 'البحث',
-          ),
-          BottomNavigationBarItem(
-            icon: SvgPicture.asset(
-              AppAssets.navAdd,
-              colorFilter: ColorFilter.mode(
-                _selectedIndex == 2 ? AppTheme.primaryColor : Colors.grey,
-                BlendMode.srcIn,
+            BottomNavigationBarItem(
+              icon: SvgPicture.asset(
+                AppAssets.navSearch,
+                colorFilter: ColorFilter.mode(
+                  _selectedIndex == 1 ? AppTheme.primaryColor : Colors.grey,
+                  BlendMode.srcIn,
+                ),
+                width: 24,
+                height: 24,
               ),
-              width: 24,
-              height: 24,
+              label: 'البحث',
             ),
-            label: 'طلب قصة',
-          ),
-          BottomNavigationBarItem(
-            icon: SvgPicture.asset(
-              AppAssets.navMenu,
-              colorFilter: ColorFilter.mode(
-                _selectedIndex == 3 ? AppTheme.primaryColor : Colors.grey,
-                BlendMode.srcIn,
+            BottomNavigationBarItem(
+              icon: SvgPicture.asset(
+                AppAssets.navAdd,
+                colorFilter: ColorFilter.mode(
+                  _selectedIndex == 2 ? AppTheme.primaryColor : Colors.grey,
+                  BlendMode.srcIn,
+                ),
+                width: 24,
+                height: 24,
               ),
-              width: 24,
-              height: 24,
+              label: 'طلب قصة',
             ),
-            label: 'القائمة',
-          ),
-        ],
+            BottomNavigationBarItem(
+              icon: SvgPicture.asset(
+                AppAssets.navMenu,
+                colorFilter: ColorFilter.mode(
+                  _selectedIndex == 3 ? AppTheme.primaryColor : Colors.grey,
+                  BlendMode.srcIn,
+                ),
+                width: 24,
+                height: 24,
+              ),
+              label: 'القائمة',
+            ),
+          ],
+        ),
       ),
     );
   }
