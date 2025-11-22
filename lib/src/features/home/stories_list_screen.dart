@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/services/supabase_service.dart';
 import '../../core/models/story_model.dart';
@@ -116,7 +117,12 @@ class _StoriesListScreenState extends State<StoriesListScreen> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
+                    // Check if it's a network error
+                    final error = snapshot.error.toString();
+                    if (error.contains('SocketException') || error.contains('Failed host lookup')) {
+                       return const Center(child: Text('لا يوجد اتصال بالإنترنت'));
+                    }
+                    return Center(child: Text('حدث خطأ غير متوقع'));
                   } else if (_filteredStories.isEmpty) {
                     return const Center(child: Text('لا توجد قصص'));
                   }
@@ -165,23 +171,18 @@ class _StoriesListScreenState extends State<StoriesListScreen> {
         ),
         child: Stack(
           children: [
-            // Image
             Positioned.fill(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
-                child: Image.network(
-                  story.coverUrl,
+                child: CachedNetworkImage(
+                  imageUrl: story.coverUrl,
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: Colors.grey[300],
-                      child: const Icon(Icons.broken_image, color: Colors.grey),
-                    );
-                  },
+                  width: double.infinity,
+                  placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+                  errorWidget: (context, url, error) => const Icon(Icons.broken_image, size: 50, color: Colors.grey),
                 ),
               ),
             ),
-            // Gradient Overlay
             Positioned.fill(
               child: Container(
                 decoration: BoxDecoration(

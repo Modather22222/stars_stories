@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/services/supabase_service.dart';
@@ -203,7 +204,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
                     } else if (snapshot.hasError) {
-                      return Center(child: Text('Error: ${snapshot.error}'));
+                      // Check if it's a network error (often contains "SocketException" or "Failed host lookup")
+                      final error = snapshot.error.toString();
+                      if (error.contains('SocketException') || error.contains('Failed host lookup')) {
+                         return const Center(child: Text('لا يوجد اتصال بالإنترنت'));
+                      }
+                      return Center(child: Text('حدث خطأ غير متوقع'));
                     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                       return const Center(child: Text('لا توجد قصص مضافة حديثاً'));
                     }
@@ -335,12 +341,13 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             ClipRRect(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-              child: Image.network(
-                story.coverUrl,
+              child: CachedNetworkImage(
+                imageUrl: story.coverUrl,
                 height: 120,
                 width: double.infinity,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
+                placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+                errorWidget: (context, url, error) {
                   return Container(
                     height: 120,
                     color: Colors.grey[300],

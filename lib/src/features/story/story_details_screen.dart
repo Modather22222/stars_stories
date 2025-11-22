@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/services/supabase_service.dart';
 import '../../core/models/story_model.dart';
@@ -69,7 +70,6 @@ class _StoryDetailsScreenState extends State<StoryDetailsScreen> {
                   return Column(
                     children: [
                       Container(
-                        height: 250,
                         width: double.infinity,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20),
@@ -77,15 +77,17 @@ class _StoryDetailsScreenState extends State<StoryDetailsScreen> {
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(20),
-                          child: Image.network(
-                            page.imageUrl,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
+                          child: CachedNetworkImage(
+                            imageUrl: page.imageUrl,
+                            fit: BoxFit.fitWidth,
+                            placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+                            errorWidget: (context, url, error) {
                               // Fallback to cover image or placeholder if page image fails
-                              return Image.network(
-                                widget.imagePath,
-                                fit: BoxFit.cover,
-                                errorBuilder: (c, e, s) => const Icon(Icons.broken_image, size: 50, color: Colors.grey),
+                              return CachedNetworkImage(
+                                imageUrl: widget.imagePath,
+                                fit: BoxFit.fitWidth,
+                                placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+                                errorWidget: (c, e, s) => const Icon(Icons.broken_image, size: 50, color: Colors.grey),
                               );
                             },
                           ),
