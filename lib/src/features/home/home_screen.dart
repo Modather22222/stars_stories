@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/services/supabase_service.dart';
+import '../../core/models/story_model.dart';
 import '../request_story/request_story_screen.dart';
 import '../search/search_screen.dart';
 import '../menu/menu_screen.dart';
@@ -192,24 +194,32 @@ class _HomeScreenState extends State<HomeScreen> {
               }),
               const SizedBox(height: 16),
 
-              // Recently Added List
+              // Recently Added List (Supabase)
               SizedBox(
-                height: 180,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    _buildStoryCard(
-                      'رحلة إلى الفضاء',
-                      AppAssets.storyThumb1,
-                      4.8,
-                    ),
-                    const SizedBox(width: 16),
-                    _buildStoryCard(
-                      'أصدقاء الغابة',
-                      AppAssets.storyThumb2,
-                      4.5,
-                    ),
-                  ],
+                height: 240,
+                child: FutureBuilder<List<StoryModel>>(
+                  future: SupabaseService.getRecentStories(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return const Center(child: Text('لا توجد قصص مضافة حديثاً'));
+                    }
+
+                    final stories = snapshot.data!;
+                    return ListView.separated(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      scrollDirection: Axis.horizontal,
+                      itemCount: stories.length,
+                      separatorBuilder: (context, index) => const SizedBox(width: 16),
+                      itemBuilder: (context, index) {
+                        final story = stories[index];
+                        return _buildStoryCard(context, story);
+                      },
+                    );
+                  },
                 ),
               ),
             ],
@@ -297,71 +307,91 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildStoryCard(String title, String imagePath, double rating) {
+  Widget _buildStoryCard(BuildContext context, StoryModel story) {
     return GestureDetector(
-      onTap: () {
-        context.push('/story-details', extra: {
-          'title': title,
-          'imagePath': imagePath,
-        });
-      },
+      onTap: () => context.push(
+        '/story-details',
+        extra: {
+          'id': story.id.toString(),
+          'title': story.title,
+          'imagePath': story.coverUrl,
+        },
+      ),
       child: Container(
-        width: 140,
+        width: 160,
         decoration: BoxDecoration(
+          color: Colors.white,
           borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withValues(alpha: 0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Image.asset(
-                    imagePath,
-                    width: 140,
-                    height: 140,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                Positioned(
-                  top: 8,
-                  left: 8,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.9),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.star,
-                          color: Colors.amber,
-                          size: 14,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          rating.toString(),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              child: Image.network(
+                story.coverUrl,
+                height: 120,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    height: 120,
+                    color: Colors.grey[300],
+                    child: const Icon(Icons.broken_image, color: Colors.grey),
+                  );
+                },
+              ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    story.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: AppTheme.darkText,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    story.category,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppTheme.greyText,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.star,
+                        size: 16,
+                        color: Colors.amber,
+                      ),
+                      const SizedBox(width: 4),
+                      const Text(
+                        '4.5', // Placeholder rating
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.darkText,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],

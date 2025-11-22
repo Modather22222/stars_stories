@@ -1,19 +1,76 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../core/constants/app_assets.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/services/supabase_service.dart';
+import '../../core/models/story_model.dart';
 
-class StoriesListScreen extends StatelessWidget {
+class StoriesListScreen extends StatefulWidget {
   final String title;
 
   const StoriesListScreen({super.key, required this.title});
+
+  @override
+  State<StoriesListScreen> createState() => _StoriesListScreenState();
+}
+
+class _StoriesListScreenState extends State<StoriesListScreen> {
+  late Future<List<StoryModel>> _storiesFuture;
+  List<StoryModel> _allStories = [];
+  List<StoryModel> _filteredStories = [];
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStories();
+    _searchController.addListener(_filterStories);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _loadStories() {
+    if (widget.title == 'مضافة حديثاً' || widget.title == 'أضيف حديثاً') {
+      _storiesFuture = SupabaseService.getStories(); // Get all sorted by date
+    } else {
+      // Assume title is category name
+      // Map display title to category key if needed, or use as is
+      // For now, using title as category
+      _storiesFuture = SupabaseService.getStoriesByCategory(widget.title);
+    }
+
+    _storiesFuture.then((stories) {
+      if (mounted) {
+        setState(() {
+          _allStories = stories;
+          _filteredStories = stories;
+        });
+      }
+    });
+  }
+
+  void _filterStories() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      if (query.isEmpty) {
+        _filteredStories = _allStories;
+      } else {
+        _filteredStories = _allStories.where((story) {
+          return story.title.toLowerCase().contains(query);
+        }).toList();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          title,
+          widget.title,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -40,8 +97,9 @@ class StoriesListScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              child: const TextField(
-                decoration: InputDecoration(
+              child: TextField(
+                controller: _searchController,
+                decoration: const InputDecoration(
                   hintText: 'ابحث عن قصة',
                   border: InputBorder.none,
                   icon: Icon(Icons.search, color: AppTheme.greyText),
@@ -52,17 +110,30 @@ class StoriesListScreen extends StatelessWidget {
 
             // Grid
             Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                childAspectRatio: 0.75,
-                children: [
-                  _buildStoryCard(context, 'علاء الدين والمصباح السحري', AppAssets.storyAladdin, 4.8),
-                  _buildStoryCard(context, 'مريم ومساعدة الآخرين', AppAssets.storyMaryam, 4.8),
-                  _buildStoryCard(context, 'مريم ومساعدة الآخرين', AppAssets.storyMaryam, 4.9), // Duplicate for demo
-                  _buildStoryCard(context, 'علاء الدين والمصباح السحري', AppAssets.storyAladdin, 4.8), // Duplicate for demo
-                ],
+              child: FutureBuilder<List<StoryModel>>(
+                future: _storiesFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (_filteredStories.isEmpty) {
+                    return const Center(child: Text('لا توجد قصص'));
+                  }
+
+                  return GridView.builder(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 16,
+                      crossAxisSpacing: 16,
+                      childAspectRatio: 0.75,
+                    ),
+                    itemCount: _filteredStories.length,
+                    itemBuilder: (context, index) {
+                      return _buildStoryCard(context, _filteredStories[index]);
+                    },
+                  );
+                },
               ),
             ),
           ],
@@ -71,35 +142,58 @@ class StoriesListScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStoryCard(BuildContext context, String title, String imagePath, double rating) {
+  Widget _buildStoryCard(BuildContext context, StoryModel story) {
     return GestureDetector(
       onTap: () {
         context.push('/story-details', extra: {
-          'title': title,
-          'imagePath': imagePath,
+          'id': story.id.toString(),
+          'title': story.title,
+          'imagePath': story.coverUrl,
         });
       },
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          image: DecorationImage(
-            image: AssetImage(imagePath),
-            fit: BoxFit.cover,
-          ),
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withValues(alpha: 0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Stack(
           children: [
-            // Gradient Overlay
-            Container(
-              decoration: BoxDecoration(
+            // Image
+            Positioned.fill(
+              child: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black.withValues(alpha: 0.8),
-                  ],
+                child: Image.network(
+                  story.coverUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.broken_image, color: Colors.grey),
+                    );
+                  },
+                ),
+              ),
+            ),
+            // Gradient Overlay
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.8),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -113,13 +207,13 @@ class StoriesListScreen extends StatelessWidget {
                   color: Colors.white.withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Row(
+                child: const Row(
                   children: [
-                    const Icon(Icons.star, color: Colors.amber, size: 14),
-                    const SizedBox(width: 4),
+                    Icon(Icons.star, color: Colors.amber, size: 14),
+                    SizedBox(width: 4),
                     Text(
-                      rating.toString(),
-                      style: const TextStyle(
+                      '4.5', // Placeholder
+                      style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),
@@ -134,8 +228,10 @@ class StoriesListScreen extends StatelessWidget {
               right: 12,
               left: 12,
               child: Text(
-                title,
+                story.title,
                 textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,

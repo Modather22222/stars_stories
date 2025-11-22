@@ -39,10 +39,11 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/story-details',
       builder: (context, state) {
-        final args = state.extra as Map<String, String>;
+        final extra = state.extra as Map<String, dynamic>;
         return StoryDetailsScreen(
-          title: args['title']!,
-          imagePath: args['imagePath']!,
+          id: int.parse(extra['id'] as String),
+          title: extra['title'] as String,
+          imagePath: extra['imagePath'] as String,
         );
       },
     ),
