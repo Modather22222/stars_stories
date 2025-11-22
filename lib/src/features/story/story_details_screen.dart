@@ -55,7 +55,12 @@ class _StoryDetailsScreenState extends State<StoryDetailsScreen> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            // Check if it's a network error
+            final error = snapshot.error.toString();
+            if (error.contains('SocketException') || error.contains('Failed host lookup')) {
+               return const Center(child: Text('لا يوجد اتصال بالإنترنت'));
+            }
+            return const Center(child: Text('حدث خطأ غير متوقع'));
           } else if (!snapshot.hasData) {
             return const Center(child: Text('القصة غير موجودة'));
           }
