@@ -3,6 +3,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/services/supabase_service.dart';
+import '../../core/services/favorites_service.dart';
 import '../../core/models/story_model.dart';
 
 class StoryDetailsScreen extends StatefulWidget {
@@ -23,11 +24,42 @@ class StoryDetailsScreen extends StatefulWidget {
 
 class _StoryDetailsScreenState extends State<StoryDetailsScreen> {
   late Future<StoryModel> _storyFuture;
+  bool _isFavorite = false;
+  bool _isLoadingFavorite = true;
 
   @override
   void initState() {
     super.initState();
     _storyFuture = SupabaseService.getStoryDetails(widget.id);
+    _loadFavoriteStatus();
+  }
+
+  Future<void> _loadFavoriteStatus() async {
+    final isFav = await FavoritesService.isFavorite(widget.id);
+    setState(() {
+      _isFavorite = isFav;
+      _isLoadingFavorite = false;
+    });
+  }
+
+  Future<void> _toggleFavorite() async {
+    final newStatus = await FavoritesService.toggleFavorite(widget.id);
+    setState(() {
+      _isFavorite = newStatus;
+    });
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            newStatus ? 'تم الإضافة إلى المفضلة' : 'تم الإزالة من المفضلة',
+            textAlign: TextAlign.center,
+          ),
+          duration: const Duration(seconds: 2),
+          backgroundColor: newStatus ? Colors.green : Colors.grey,
+        ),
+      );
+    }
   }
 
   @override
@@ -43,10 +75,22 @@ class _StoryDetailsScreenState extends State<StoryDetailsScreen> {
         elevation: 0,
         foregroundColor: AppTheme.darkText,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.favorite_border, color: Colors.red),
-            onPressed: () {},
-          ),
+          _isLoadingFavorite
+              ? const Padding(
+                  padding: EdgeInsets.all(12.0),
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                )
+              : IconButton(
+                  icon: Icon(
+                    _isFavorite ? Icons.favorite : Icons.favorite_border,
+                    color: Colors.red,
+                  ),
+                  onPressed: _toggleFavorite,
+                ),
         ],
       ),
       body: FutureBuilder<StoryModel>(

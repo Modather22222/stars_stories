@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/services/favorites_service.dart';
+import '../../core/services/supabase_service.dart';
+import '../../core/models/story_model.dart';
 
 class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});
@@ -11,8 +15,71 @@ class FavoritesScreen extends StatefulWidget {
 }
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
-  // Mock data - set to empty list to show empty state initially
-  final List<Map<String, dynamic>> _favorites = [];
+  List<StoryModel> _favorites = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFavorites();
+  }
+
+  Future<void> _loadFavorites() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final favoriteIds = await FavoritesService.getFavoriteIds();
+      
+      if (favoriteIds.isEmpty) {
+        setState(() {
+          _favorites = [];
+          _isLoading = false;
+        });
+        return;
+      }
+
+      // Fetch story details for each favorite
+      List<StoryModel> stories = [];
+      for (int id in favoriteIds) {
+        try {
+          final story = await SupabaseService.getStoryDetails(id);
+          stories.add(story);
+        } catch (e) {
+          // Skip stories that fail to load
+        }
+      }
+
+      setState(() {
+        _favorites = stories;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _favorites = [];
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _removeFavorite(int storyId) async {
+    await FavoritesService.removeFavorite(storyId);
+    _loadFavorites();
+    
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'تم الإزالة من المفضلة',
+            textAlign: TextAlign.center,
+          ),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.grey,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +100,11 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           onPressed: () => context.pop(),
         ),
       ),
-      body: _favorites.isEmpty ? _buildEmptyState() : _buildFavoritesList(),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _favorites.isEmpty
+              ? _buildEmptyState()
+              : _buildFavoritesList(),
     );
   }
 
@@ -116,67 +187,88 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     );
   }
 
-  Widget _buildFavoriteItem(Map<String, dynamic> story) {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Image
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.asset(
-              story['image'],
-              width: 80,
-              height: 80,
-              fit: BoxFit.cover,
+  Widget _buildFavoriteItem(StoryModel story) {
+    return GestureDetector(
+      onTap: () {
+        context.push('/story-details', extra: {
+          'id': story.id.toString(),
+          'title': story.title,
+          'imagePath': story.coverUrl,
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-          ),
-          const SizedBox(width: 16),
-          
-          // Details
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  story['title'],
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.darkText,
+          ],
+        ),
+        child: Row(
+          children: [
+            // Image
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: CachedNetworkImage(
+                imageUrl: story.coverUrl,
+                width: 80,
+                height: 80,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => const Center(
+                  child: SizedBox(
+                    width: 30,
+                    height: 30,
+                    child: CircularProgressIndicator(strokeWidth: 2),
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  story['category'],
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppTheme.greyText,
-                  ),
+                errorWidget: (context, url, error) => const Icon(
+                  Icons.broken_image,
+                  size: 40,
+                  color: Colors.grey,
                 ),
-              ],
+              ),
             ),
-          ),
-          
-          // Favorite Icon
-          IconButton(
-            icon: const Icon(Icons.favorite, color: Color(0xFFFF5D5D)),
-            onPressed: () {
-              // Remove from favorites logic
-            },
-          ),
-        ],
+            const SizedBox(width: 16),
+            
+            // Details
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    story.title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.darkText,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    story.category,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppTheme.greyText,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            // Favorite Icon
+            IconButton(
+              icon: const Icon(Icons.favorite, color: Color(0xFFFF5D5D)),
+              onPressed: () => _removeFavorite(story.id),
+            ),
+          ],
+        ),
       ),
     );
   }
