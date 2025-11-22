@@ -15,4 +15,10 @@ class AppAssets {
   static const String storyMaryam = 'assets/images/story_maryam.png';
   static const String searchPlaceholder = 'assets/images/search_placeholder.png';
   static const String favoritesPlaceholder = 'assets/images/favorites_placeholder.png';
+  
+  // Navbar Icons (SVG)
+  static const String navHome = 'assets/NabBar_Icons/Home.svg';
+  static const String navSearch = 'assets/NabBar_Icons/Search.svg';
+  static const String navAdd = 'assets/NabBar_Icons/add-circle.svg';
+  static const String navMenu = 'assets/NabBar_Icons/Menu.svg';
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/services/supabase_service.dart';
@@ -42,21 +43,53 @@ class _HomeScreenState extends State<HomeScreen> {
         selectedItemColor: AppTheme.primaryColor,
         unselectedItemColor: Colors.grey,
         showUnselectedLabels: true,
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home_filled),
+            icon: SvgPicture.asset(
+              AppAssets.navHome,
+              colorFilter: ColorFilter.mode(
+                _selectedIndex == 0 ? AppTheme.primaryColor : Colors.grey,
+                BlendMode.srcIn,
+              ),
+              width: 24,
+              height: 24,
+            ),
             label: 'الرئيسية',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.search),
+            icon: SvgPicture.asset(
+              AppAssets.navSearch,
+              colorFilter: ColorFilter.mode(
+                _selectedIndex == 1 ? AppTheme.primaryColor : Colors.grey,
+                BlendMode.srcIn,
+              ),
+              width: 24,
+              height: 24,
+            ),
             label: 'البحث',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle_outline),
+            icon: SvgPicture.asset(
+              AppAssets.navAdd,
+              colorFilter: ColorFilter.mode(
+                _selectedIndex == 2 ? AppTheme.primaryColor : Colors.grey,
+                BlendMode.srcIn,
+              ),
+              width: 24,
+              height: 24,
+            ),
             label: 'طلب قصة',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.grid_view),
+            icon: SvgPicture.asset(
+              AppAssets.navMenu,
+              colorFilter: ColorFilter.mode(
+                _selectedIndex == 3 ? AppTheme.primaryColor : Colors.grey,
+                BlendMode.srcIn,
+              ),
+              width: 24,
+              height: 24,
+            ),
             label: 'القائمة',
           ),
         ],
