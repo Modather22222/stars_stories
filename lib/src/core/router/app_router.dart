@@ -4,6 +4,7 @@ import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/home/categories_screen.dart';
 import '../../features/home/stories_list_screen.dart';
+import '../../features/home/recently_added_screen.dart';
 import '../../features/story/story_details_screen.dart';
 import '../../features/request_story/request_story_screen.dart';
 import '../../features/favorites/favorites_screen.dart';
@@ -35,6 +36,10 @@ final appRouter = GoRouter(
         final title = state.extra as String? ?? 'قائمة القصص';
         return StoriesListScreen(title: title);
       },
+    ),
+    GoRoute(
+      path: '/recently-added',
+      builder: (context, state) => const RecentlyAddedScreen(),
     ),
     GoRoute(
       path: '/story-details',

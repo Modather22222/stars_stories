@@ -5,16 +5,14 @@ import '../../core/theme/app_theme.dart';
 import '../../core/services/supabase_service.dart';
 import '../../core/models/story_model.dart';
 
-class StoriesListScreen extends StatefulWidget {
-  final String title;
-
-  const StoriesListScreen({super.key, required this.title});
+class RecentlyAddedScreen extends StatefulWidget {
+  const RecentlyAddedScreen({super.key});
 
   @override
-  State<StoriesListScreen> createState() => _StoriesListScreenState();
+  State<RecentlyAddedScreen> createState() => _RecentlyAddedScreenState();
 }
 
-class _StoriesListScreenState extends State<StoriesListScreen> {
+class _RecentlyAddedScreenState extends State<RecentlyAddedScreen> {
   late Future<List<StoryModel>> _storiesFuture;
   List<StoryModel> _allStories = [];
   List<StoryModel> _filteredStories = [];
@@ -34,8 +32,7 @@ class _StoriesListScreenState extends State<StoriesListScreen> {
   }
 
   void _loadStories() {
-    // Load stories by category
-    _storiesFuture = SupabaseService.getStoriesByCategory(widget.title);
+    _storiesFuture = SupabaseService.getStories(); // Get all stories sorted by date
 
     _storiesFuture.then((stories) {
       if (mounted) {
@@ -64,9 +61,9 @@ class _StoriesListScreenState extends State<StoriesListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          widget.title,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+        title: const Text(
+          'مضافة حديثاً',
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
@@ -116,7 +113,7 @@ class _StoriesListScreenState extends State<StoriesListScreen> {
                     if (error.contains('SocketException') || error.contains('Failed host lookup')) {
                        return const Center(child: Text('لا يوجد اتصال بالإنترنت'));
                     }
-                    return Center(child: Text('حدث خطأ غير متوقع'));
+                    return const Center(child: Text('حدث خطأ غير متوقع'));
                   } else if (_filteredStories.isEmpty) {
                     return const Center(child: Text('لا توجد قصص'));
                   }

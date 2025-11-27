@@ -137,10 +137,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          const Text(
-                            '👋',
-                            style: TextStyle(fontSize: 20),
-                          ),
+                          const Text('👋', style: TextStyle(fontSize: 20)),
                         ],
                       ),
                       const Text(
@@ -227,9 +224,21 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(width: 16),
                     _buildCategoryCard(
-                      'قصص إسلامية',
-                      AppAssets.catIslamic,
+                      'قصص تربوية',
+                      AppAssets.catPurposeful,
                       const Color(0xFFF4FBF7),
+                    ),
+                    const SizedBox(width: 16),
+                    _buildCategoryCard( 
+                      'قصص المهن',    
+                      AppAssets.catFantasy,
+                      const Color(0xFFFFF9F0),
+                    ),
+                    const SizedBox(width: 16),
+                    _buildCategoryCard(
+                      'قصص هادفة',  
+                      AppAssets.catIslamic,
+                      const Color(0xFFF0F5FF),
                     ),
                   ],
                 ),
@@ -238,7 +247,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               // Recently Added Header
               _buildSectionHeader(context, 'مضافة حديثاً', 'عرض الكل', () {
-                context.push('/stories-list', extra: 'مضافة حديثاً');
+                context.push('/recently-added');
               }),
               const SizedBox(height: 16),
 
@@ -253,12 +262,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     } else if (snapshot.hasError) {
                       // Check if it's a network error (often contains "SocketException" or "Failed host lookup")
                       final error = snapshot.error.toString();
-                      if (error.contains('SocketException') || error.contains('Failed host lookup')) {
-                         return const Center(child: Text('لا يوجد اتصال بالإنترنت'));
+                      if (error.contains('SocketException') ||
+                          error.contains('Failed host lookup')) {
+                        return const Center(
+                          child: Text('لا يوجد اتصال بالإنترنت'),
+                        );
                       }
                       return Center(child: Text('حدث خطأ غير متوقع'));
                     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Center(child: Text('لا توجد قصص مضافة حديثاً'));
+                      return const Center(
+                        child: Text('لا توجد قصص مضافة حديثاً'),
+                      );
                     }
 
                     final stories = snapshot.data!;
@@ -266,7 +280,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       scrollDirection: Axis.horizontal,
                       itemCount: stories.length,
-                      separatorBuilder: (context, index) => const SizedBox(width: 16),
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(width: 16),
                       itemBuilder: (context, index) {
                         final story = stories[index];
                         return _buildStoryCard(context, story);
@@ -282,7 +297,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title, String action, VoidCallback onTap) {
+  Widget _buildSectionHeader(
+    BuildContext context,
+    String title,
+    String action,
+    VoidCallback onTap,
+  ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -300,10 +320,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Text(
                 action,
-                style: const TextStyle(
-                  color: AppTheme.greyText,
-                  fontSize: 14,
-                ),
+                style: const TextStyle(color: AppTheme.greyText, fontSize: 14),
               ),
               const SizedBox(width: 4),
               const Icon(
@@ -319,43 +336,41 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildCategoryCard(String title, String imagePath, Color bgColor) {
-    return Container(
-      width: 140,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: bgColor,
-              borderRadius: BorderRadius.circular(12),
+    return GestureDetector(
+      onTap: () {
+        context.push('/stories-list', extra: title);
+      },
+      child: Container(
+        width: 140,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withValues(alpha: 0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-            child: Image.asset(
-              imagePath,
-              width: 60,
-              height: 60,
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: bgColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Image.asset(imagePath, width: 60, height: 60),
             ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            title,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
+            const SizedBox(height: 12),
+            Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -387,13 +402,16 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
               child: CachedNetworkImage(
                 imageUrl: story.coverUrl,
                 height: 120,
                 width: double.infinity,
                 fit: BoxFit.cover,
-                placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+                placeholder: (context, url) =>
+                    const Center(child: CircularProgressIndicator()),
                 errorWidget: (context, url, error) {
                   return Container(
                     height: 120,
@@ -429,11 +447,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(
-                        Icons.star,
-                        size: 16,
-                        color: Colors.amber,
-                      ),
+                      const Icon(Icons.star, size: 16, color: Colors.amber),
                       const SizedBox(width: 4),
                       const Text(
                         '4.5', // Placeholder rating
