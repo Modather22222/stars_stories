@@ -185,7 +185,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Text(
                           'كل قصة نجمة تضيء خيال طفلك',
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: AppTheme.primaryColor,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                             height: 1.5,
@@ -225,19 +225,19 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(width: 16),
                     _buildCategoryCard(
                       'قصص تربوية',
-                      AppAssets.catPurposeful,
+                      AppAssets.catMoral,
                       const Color(0xFFF4FBF7),
                     ),
                     const SizedBox(width: 16),
                     _buildCategoryCard( 
                       'قصص المهن',    
-                      AppAssets.catFantasy,
+                      AppAssets.catCareers,
                       const Color(0xFFFFF9F0),
                     ),
                     const SizedBox(width: 16),
                     _buildCategoryCard(
                       'قصص هادفة',  
-                      AppAssets.catIslamic,
+                      AppAssets.catPurposeful,
                       const Color(0xFFF0F5FF),
                     ),
                   ],

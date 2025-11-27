@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_assets.dart';
 import '../../core/theme/app_theme.dart';
@@ -28,9 +29,9 @@ class CategoriesScreen extends StatelessWidget {
           childAspectRatio: 0.85,
           children: [
             _buildCategoryCard(context, 'قصص تعليمية', AppAssets.catEducational, const Color(0xFFFFF4E6)),
-            _buildCategoryCard(context, 'قصص تربوية', AppAssets.catPurposeful, const Color(0xFFE6F4FF)),
-            _buildCategoryCard(context, 'قصص المهن', AppAssets.catFantasy, const Color(0xFFFFF0F5)),
-            _buildCategoryCard(context, 'قصص هادفة', AppAssets.catEducational, const Color(0xFFF0F0FF)),
+            _buildCategoryCard(context, 'قصص تربوية', AppAssets.catMoral, const Color(0xFFE6F4FF)),
+            _buildCategoryCard(context, 'قصص المهن', AppAssets.catCareers, const Color(0xFFFFF0F5)),
+            _buildCategoryCard(context, 'قصص هادفة', AppAssets.catPurposeful, const Color(0xFFF0F0FF)),
           ],
         ),
       ),
@@ -40,11 +41,7 @@ class CategoriesScreen extends StatelessWidget {
   Widget _buildCategoryCard(BuildContext context, String title, String imagePath, Color bgColor) {
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(
-          context,
-          '/stories-list',
-          arguments: title,
-        );
+        context.push('/stories-list', extra: title);
       },
       child: Container(
         decoration: BoxDecoration(
