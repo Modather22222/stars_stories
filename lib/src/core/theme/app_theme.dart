@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 
 class AppTheme {
   static const Color primaryColor = Color(0xFFEF3349);
@@ -11,9 +11,10 @@ class AppTheme {
     return ThemeData(
       primaryColor: primaryColor,
       scaffoldBackgroundColor: background,
-      textTheme: GoogleFonts.elMessiriTextTheme().apply(
-        bodyColor: darkText,
-        displayColor: darkText,
+      fontFamily: 'ElMessiri',
+      textTheme: const TextTheme(
+        bodyMedium: TextStyle(color: darkText),
+        displayLarge: TextStyle(color: darkText),
       ),
       colorScheme: ColorScheme.fromSeed(
         seedColor: primaryColor,
